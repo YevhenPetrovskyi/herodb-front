@@ -21,13 +21,19 @@ import { FormSchema } from '@/validators/formSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { XIcon } from 'lucide-react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import * as z from 'zod'
 
 import { Form } from '@/components/ui/form'
 
-import { createSuperhero } from '@/services/hero-service'
+import { useConfirm } from '@/hooks/use-confirm'
+
+import { selectHeroStatus } from '@/store/hero/heroSlice'
+import { createHero } from '@/store/hero/operations'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
 
 type ImageWithId = {
 	file: File
@@ -35,9 +41,20 @@ type ImageWithId = {
 }
 
 export const HeroForm = () => {
+	const router = useRouter()
+	const dispatch = useAppDispatch()
+
 	const [images, setImages] = useState<ImageWithId[]>([])
 	const [isDragging, setIsDragging] = useState(false)
 	const imageElementRef = useRef<HTMLInputElement>(null)
+
+	const [ConfirmDialog, confirm] = useConfirm(
+		'Are you sure you want to exit?',
+		'The entered data will not be saved'
+	)
+
+	const status = useAppSelector(selectHeroStatus)
+	const isLoading = status === 'loading'
 
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
@@ -96,6 +113,21 @@ export const HeroForm = () => {
 		setIsDragging(false)
 	}
 
+	const handleCancel = async () => {
+		const ok = await confirm()
+
+		if (!ok) {
+			return
+		}
+
+		form.reset()
+
+		if (imageElementRef.current) {
+			imageElementRef.current.value = ''
+			setImages([])
+		}
+	}
+
 	const onSubmit = (values: z.infer<typeof FormSchema>) => {
 		const formData = new FormData()
 
@@ -109,167 +141,193 @@ export const HeroForm = () => {
 			formData.append('pictures', f.file)
 		})
 
-		createSuperhero(formData)
+		dispatch(createHero(formData))
+			.unwrap()
+			.then(data => {
+				toast.success('Hero created successfully')
+				router.push(`/superhero/${data.id}`)
+			})
 	}
 	return (
-		<Card className='w-[600px] shadow-md mb-10'>
-			<CardHeader>
-				<CardTitle>Create Hero</CardTitle>
-				<CardDescription>You can create a new hero</CardDescription>
-			</CardHeader>
-			<CardContent>
-				<Form {...form}>
-					<form id='hero-form' onSubmit={form.handleSubmit(onSubmit)}>
-						<FormField
-							control={form.control}
-							name='nickname'
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Hero nickname</FormLabel>
-									<FormControl>
-										<Input
-											{...field}
-											placeholder='Nickname'
-											type='text'
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name='real_name'
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Hero real name</FormLabel>
-									<FormControl>
-										<Input
-											{...field}
-											placeholder='Real name'
-											type='text'
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name='origin_description'
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Origin description</FormLabel>
-									<FormControl>
-										<Textarea
-											{...field}
-											placeholder='Origin description...'
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name='superpowers'
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Superpowers</FormLabel>
-									<FormControl>
-										<Textarea
-											{...field}
-											placeholder='Superpowers...'
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name='catch_phrase'
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Catch phrase</FormLabel>
-									<FormControl>
-										<Textarea
-											{...field}
-											placeholder='Catch phrase...'
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-					</form>
-				</Form>
-
-				<div className='mt-4'>
-					{images.length > 0 && (
-						<div className='p-2 flex flex-wrap gap-2'>
-							{images.map(({ file, id }) => (
-								<div
-									key={id}
-									className='relative size-[100px] flex items-center justify-center group/image'
-								>
-									<Hint label='Remove image'>
-										<button
-											onClick={() => removeImage(id)}
-											className='hidden group-hover/image:flex rounded-full bg-black/70 hover:bg-black absolute -top-2.5 -right-2.5 text-white size-6 z-[4] border-2 border-white items-center justify-center'
-										>
-											<XIcon className='size-3.5' />
-										</button>
-									</Hint>
-									<Image
-										src={URL.createObjectURL(file)}
-										alt='Uploaded'
-										fill
-										className='rounded-xl overflow-hidden border object-cover'
-									/>
-								</div>
-							))}
-						</div>
-					)}
-					<input
-						type='file'
-						multiple
-						accept='image/*'
-						ref={imageElementRef}
-						onChange={event => {
-							if (event.target.files) {
-								uploadImage(event.target.files)
-								event.target.value = ''
-							}
-						}}
-						className='hidden'
-					/>
-
-					<div
-						onDrop={handleDrop}
-						onDragOver={handleDragOver}
-						onDragLeave={handleDragLeave}
-						className={`mt-4 border-2 border-dashed p-4 rounded-lg text-center ${
-							isDragging
-								? 'border-blue-500 bg-blue-100'
-								: 'border-gray-300'
-						}`}
-					>
-						<p className='mb-2'>Drag & drop files here, or</p>
-						<Button
-							onClick={() => imageElementRef.current?.click()}
+		<>
+			<ConfirmDialog />
+			<Card className='w-[600px] shadow-md mb-10'>
+				<CardHeader>
+					<CardTitle>Create Hero</CardTitle>
+					<CardDescription>You can create a new hero</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<Form {...form}>
+						<form
+							id='hero-form'
+							onSubmit={form.handleSubmit(onSubmit)}
 						>
-							Upload
-						</Button>
+							<FormField
+								control={form.control}
+								name='nickname'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Hero nickname</FormLabel>
+										<FormControl>
+											<Input
+												{...field}
+												placeholder='Nickname'
+												type='text'
+												disabled={isLoading}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name='real_name'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Hero real name</FormLabel>
+										<FormControl>
+											<Input
+												{...field}
+												placeholder='Real name'
+												type='text'
+												disabled={isLoading}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name='origin_description'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>
+											Origin description
+										</FormLabel>
+										<FormControl>
+											<Textarea
+												{...field}
+												placeholder='Origin description...'
+												disabled={isLoading}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name='superpowers'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Superpowers</FormLabel>
+										<FormControl>
+											<Textarea
+												{...field}
+												placeholder='Superpowers...'
+												disabled={isLoading}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name='catch_phrase'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Catch phrase</FormLabel>
+										<FormControl>
+											<Textarea
+												{...field}
+												placeholder='Catch phrase...'
+												disabled={isLoading}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</form>
+					</Form>
+
+					<div className='mt-4'>
+						{images.length > 0 && (
+							<div className='p-2 flex flex-wrap gap-2'>
+								{images.map(({ file, id }) => (
+									<div
+										key={id}
+										className='relative size-[100px] flex items-center justify-center group/image'
+									>
+										<Hint label='Remove image'>
+											<button
+												onClick={() => removeImage(id)}
+												className='hidden group-hover/image:flex rounded-full bg-black/70 hover:bg-black absolute -top-2.5 -right-2.5 text-white size-6 z-[4] border-2 border-white items-center justify-center'
+											>
+												<XIcon className='size-3.5' />
+											</button>
+										</Hint>
+										<Image
+											src={URL.createObjectURL(file)}
+											alt='Uploaded'
+											fill
+											className='rounded-xl overflow-hidden border object-cover'
+										/>
+									</div>
+								))}
+							</div>
+						)}
+						<input
+							type='file'
+							multiple
+							accept='image/*'
+							ref={imageElementRef}
+							onChange={event => {
+								if (event.target.files) {
+									uploadImage(event.target.files)
+									event.target.value = ''
+								}
+							}}
+							className='hidden'
+							disabled={isLoading}
+						/>
+
+						<div
+							onDrop={handleDrop}
+							onDragOver={handleDragOver}
+							onDragLeave={handleDragLeave}
+							className={`mt-4 border-2 border-dashed p-4 rounded-lg text-center ${
+								isDragging
+									? 'border-blue-500 bg-blue-100'
+									: 'border-gray-300'
+							}`}
+						>
+							<p className='mb-2'>Drag & drop files here, or</p>
+							<Button
+								onClick={() => imageElementRef.current?.click()}
+								disabled={isLoading}
+							>
+								Upload
+							</Button>
+						</div>
 					</div>
-				</div>
-			</CardContent>
-			<CardFooter className='flex items-center justify-between'>
-				<Button variant='destructive'>Cancel</Button>
-				<Button type='submit' form='hero-form'>
-					Create
-				</Button>
-			</CardFooter>
-		</Card>
+				</CardContent>
+				<CardFooter className='flex items-center justify-between'>
+					<Button
+						variant='destructive'
+						disabled={isLoading}
+						onClick={handleCancel}
+					>
+						Cancel
+					</Button>
+					<Button type='submit' form='hero-form' disabled={isLoading}>
+						Create
+					</Button>
+				</CardFooter>
+			</Card>
+		</>
 	)
 }

@@ -1,6 +1,10 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 
-import { deleteHero, getHeroById } from '@/services/hero-service'
+import {
+	createSuperhero,
+	deleteHero,
+	getHeroById
+} from '@/services/hero-service'
 
 export const fetchHero = createAsyncThunk(
 	'hero/fetchHero',
@@ -20,6 +24,18 @@ export const deleteHeroById = createAsyncThunk(
 		try {
 			const data = await deleteHero(id)
 
+			return data
+		} catch (error: any) {
+			return thunkApi.rejectWithValue(error.message)
+		}
+	}
+)
+
+export const createHero = createAsyncThunk(
+	'hero/createHero',
+	async (formData: FormData, thunkApi) => {
+		try {
+			const data = await createSuperhero(formData)
 			return data
 		} catch (error: any) {
 			return thunkApi.rejectWithValue(error.message)

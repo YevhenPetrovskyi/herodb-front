@@ -2,12 +2,11 @@
 
 import { Loader } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
 
 import { SuperheroCard } from '@/components/superhero-card'
 
 import { fetchHeroes } from '@/store/heroes/operations'
-import { useAppDispatch } from '@/store/hooks'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
 
 import {
 	selectHeroes,
@@ -21,10 +20,10 @@ export default function Home() {
 
 	const [page, setPage] = useState(1)
 
-	const status = useSelector(selectHeroesStatus)
-	const totalPages = useSelector(selectTotalPages)
-	const error = useSelector(selectHeroesError)
-	const heroes = useSelector(selectHeroes)
+	const status = useAppSelector(selectHeroesStatus)
+	const totalPages = useAppSelector(selectTotalPages)
+	const error = useAppSelector(selectHeroesError)
+	const heroes = useAppSelector(selectHeroes)
 
 	useEffect(() => {
 		dispatch(fetchHeroes({ page, limit: 5 }))
