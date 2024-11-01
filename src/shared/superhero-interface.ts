@@ -19,5 +19,3 @@ export interface IHeroes {
 	totalPages: number
 	heroes: IHero[]
 }
-
-export interface ISuperheroEditOrCreate extends Omit<IHero, 'id'> {}

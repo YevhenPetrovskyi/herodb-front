@@ -1,8 +1,4 @@
-import {
-	IHero,
-	IHeroes,
-	ISuperheroEditOrCreate
-} from '@/shared/superhero-interface'
+import { IHero, IHeroes } from '@/shared/superhero-interface'
 
 import { axiosInstance, axiosInstanceWithUpload } from '../api/api-instance'
 
@@ -38,14 +34,11 @@ export const createSuperhero = async (formData: FormData) => {
 	return data
 }
 
-export const updateSuperhero = async (
-	superhero: ISuperheroEditOrCreate,
-	id: number
-) => {
+export const updateSuperhero = async (formData: FormData, id: number) => {
 	const { data } = await axiosInstanceWithUpload<IHero>({
 		url: `/heroes/${id}`,
 		method: 'PUT',
-		data: superhero
+		data: formData
 	})
 
 	return data

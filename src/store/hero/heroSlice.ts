@@ -1,4 +1,4 @@
-import { createHero, deleteHeroById, fetchHero } from './operations'
+import { createHero, deleteHeroById, fetchHero, updateHero } from './operations'
 import { createSlice } from '@reduxjs/toolkit'
 
 import { IHero } from '@/shared/superhero-interface'
@@ -54,6 +54,17 @@ export const heroSlice = createSlice({
 				state.error = action.error.message
 			})
 			.addCase(createHero.pending, state => {
+				state.status = 'loading'
+			})
+			.addCase(updateHero.fulfilled, (state, action) => {
+				state.status = 'succeeded'
+				state.item = action.payload
+			})
+			.addCase(updateHero.rejected, (state, action) => {
+				state.status = 'failed'
+				state.error = action.error.message
+			})
+			.addCase(updateHero.pending, state => {
 				state.status = 'loading'
 			})
 	}

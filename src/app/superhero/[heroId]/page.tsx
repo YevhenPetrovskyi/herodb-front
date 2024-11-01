@@ -1,5 +1,6 @@
 'use client'
 
+import { DialogTitle } from '@radix-ui/react-dialog'
 import { Loader } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -17,6 +18,12 @@ import {
 	CardHeader,
 	CardTitle
 } from '@/components/ui/card'
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTrigger
+} from '@/components/ui/dialog'
 
 import { useConfirm } from '@/hooks/use-confirm'
 import { useHeroId } from '@/hooks/use-hero-id'
@@ -127,7 +134,16 @@ export default function Superhero() {
 						</div>
 					</CardContent>
 					<CardFooter className='flex justify-between'>
-						<Button>Edit</Button>
+						<Dialog>
+							<DialogTrigger asChild>
+								<Button>Edit</Button>
+							</DialogTrigger>
+							<DialogContent>
+								<DialogHeader>
+									<DialogTitle>Edit Hero</DialogTitle>
+								</DialogHeader>
+							</DialogContent>
+						</Dialog>
 						<Button onClick={handleDelete} variant='destructive'>
 							Delete
 						</Button>
