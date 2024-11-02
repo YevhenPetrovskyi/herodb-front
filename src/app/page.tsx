@@ -18,6 +18,8 @@ import {
 export default function Home() {
 	const dispatch = useAppDispatch()
 
+	const PAGE_LIMIT = 5
+
 	const [page, setPage] = useState(1)
 
 	const status = useAppSelector(selectHeroesStatus)
@@ -26,7 +28,7 @@ export default function Home() {
 	const heroes = useAppSelector(selectHeroes)
 
 	useEffect(() => {
-		dispatch(fetchHeroes({ page, limit: 5 }))
+		dispatch(fetchHeroes({ page, limit: PAGE_LIMIT }))
 	}, [page, dispatch])
 
 	useEffect(() => {

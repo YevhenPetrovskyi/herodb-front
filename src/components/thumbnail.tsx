@@ -18,7 +18,7 @@ export const Thumbnail = ({ url }: ThumbnailProps) => {
 				<DialogDescription className='sr-only'>
 					Click to zoom in
 				</DialogDescription>
-				<div className='relative overflow-hidden my-2 cursor-zoom-in h-[500px] w-[500px]'>
+				<div className='relative overflow-hidden my-2 cursor-zoom-in h-[500px]'>
 					<img
 						src={url}
 						alt='hero image'

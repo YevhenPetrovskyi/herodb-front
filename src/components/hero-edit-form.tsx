@@ -32,7 +32,7 @@ import { Form } from '@/components/ui/form'
 import { IHero } from '@/shared/superhero-interface'
 
 import { selectHeroStatus } from '@/store/hero/heroSlice'
-import { createHero, updateHero } from '@/store/hero/operations'
+import { updateHero } from '@/store/hero/operations'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 
 type ImageWithId = {
@@ -145,10 +145,10 @@ export const HeroEditForm = (hero: IHero) => {
 			})
 	}
 	return (
-		<Card className='w-[600px] shadow-md mb-10'>
+		<Card className='w-[600px] shadow-md mb-10 overflow-auto'>
 			<CardHeader>
-				<CardTitle>Create Hero</CardTitle>
-				<CardDescription>You can create a new hero</CardDescription>
+				<CardTitle>Edit Hero</CardTitle>
+				<CardDescription>You can edit your hero</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<Form {...form}>
@@ -244,54 +244,51 @@ export const HeroEditForm = (hero: IHero) => {
 				</Form>
 
 				<div className='mt-4'>
-					{images.length > 0 && heroPicture.length > 0 && (
-						<div className='p-2 flex flex-wrap gap-2'>
-							{heroPicture.map(({ url, id }) => (
-								<div
-									key={id}
-									className='relative size-[100px] flex items-center justify-center group/image'
-								>
-									<Hint label='Remove image'>
-										<button
-											onClick={() =>
-												handleRemoveHeroPicture(id)
-											}
-											className='hidden group-hover/image:flex rounded-full bg-black/70 hover:bg-black absolute -top-2.5 -right-2.5 text-white size-6 z-[4] border-2 border-white items-center justify-center'
-										>
-											<XIcon className='size-3.5' />
-										</button>
-									</Hint>
-									<Image
-										src={url}
-										alt='Uploaded'
-										fill
-										className='rounded-xl overflow-hidden border object-cover'
-									/>
-								</div>
-							))}
-							{images.map(({ file, id }) => (
-								<div
-									key={id}
-									className='relative size-[100px] flex items-center justify-center group/image'
-								>
-									<Hint label='Remove image'>
-										<button
-											onClick={() => removeImage(id)}
-											className='hidden group-hover/image:flex rounded-full bg-black/70 hover:bg-black absolute -top-2.5 -right-2.5 text-white size-6 z-[4] border-2 border-white items-center justify-center'
-										>
-											<XIcon className='size-3.5' />
-										</button>
-									</Hint>
-									<Image
-										src={URL.createObjectURL(file)}
-										alt='Uploaded'
-										fill
-										className='rounded-xl overflow-hidden border object-cover'
-									/>
-								</div>
-							))}
-						</div>
-					)}
+					<div className='p-2 flex flex-wrap gap-2'>
+						{heroPicture.map(({ url, id }) => (
+							<div
+								key={id}
+								className='relative size-[100px] flex items-center justify-center group/image'
+							>
+								<Hint label='Remove image'>
+									<button
+										onClick={() =>
+											handleRemoveHeroPicture(id)
+										}
+										className='hidden group-hover/image:flex rounded-full bg-black/70 hover:bg-black absolute -top-2.5 -right-2.5 text-white size-6 z-[4] border-2 border-white items-center justify-center'
+									>
+										<XIcon className='size-3.5' />
+									</button>
+								</Hint>
+								<img
+									src={url}
+									alt='Uploaded'
+									className='rounded-xl overflow-hidden border object-cover'
+								/>
+							</div>
+						))}
+						{images.map(({ file, id }) => (
+							<div
+								key={id}
+								className='relative size-[100px] flex items-center justify-center group/image'
+							>
+								<Hint label='Remove image'>
+									<button
+										onClick={() => removeImage(id)}
+										className='hidden group-hover/image:flex rounded-full bg-black/70 hover:bg-black absolute -top-2.5 -right-2.5 text-white size-6 z-[4] border-2 border-white items-center justify-center'
+									>
+										<XIcon className='size-3.5' />
+									</button>
+								</Hint>
+								<Image
+									src={URL.createObjectURL(file)}
+									alt='Uploaded'
+									fill
+									className='rounded-xl overflow-hidden border object-cover'
+								/>
+							</div>
+						))}
+					</div>
 					<input
 						type='file'
 						multiple

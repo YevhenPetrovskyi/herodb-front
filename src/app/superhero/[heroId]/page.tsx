@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
 
+import { HeroEditForm } from '@/components/hero-edit-form'
 import { ImageGallery } from '@/components/image-gallery'
 import { Thumbnail } from '@/components/thumbnail'
 import { Button } from '@/components/ui/button'
@@ -27,6 +28,8 @@ import {
 
 import { useConfirm } from '@/hooks/use-confirm'
 import { useHeroId } from '@/hooks/use-hero-id'
+
+import { IHero } from '@/shared/superhero-interface'
 
 import {
 	selectHeroError,
@@ -138,10 +141,11 @@ export default function Superhero() {
 							<DialogTrigger asChild>
 								<Button>Edit</Button>
 							</DialogTrigger>
-							<DialogContent>
-								<DialogHeader>
+							<DialogContent className='max-w-[800px] overflow-auto h-[90vh] flex flex-col items-center justify-center'>
+								<DialogHeader className='sr-only'>
 									<DialogTitle>Edit Hero</DialogTitle>
 								</DialogHeader>
+								<HeroEditForm {...hero} />
 							</DialogContent>
 						</Dialog>
 						<Button onClick={handleDelete} variant='destructive'>
