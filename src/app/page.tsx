@@ -3,6 +3,7 @@
 import { Loader } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
+import { Pagination } from '@/components/paginatio'
 import { SuperheroCard } from '@/components/superhero-card'
 
 import { fetchHeroes } from '@/store/heroes/operations'
@@ -52,8 +53,8 @@ export default function Home() {
 	}
 
 	return (
-		<div className='mb-5'>
-			<div className='flex flex-wrap items-center justify-center gap-10'>
+		<div className='mb-5 flex flex-col items-center'>
+			<div className='flex flex-wrap items-center justify-center gap-10 mb-10'>
 				{heroes.map(superhero => (
 					<SuperheroCard
 						key={superhero.id}
@@ -63,6 +64,12 @@ export default function Home() {
 					/>
 				))}
 			</div>
+
+			<Pagination
+				currentPage={page}
+				totalPages={totalPages}
+				onPageChange={setPage}
+			/>
 		</div>
 	)
 }
