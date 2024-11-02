@@ -3,7 +3,7 @@
 import { Loader } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-import { Pagination } from '@/components/paginatio'
+import { Pagination } from '@/components/pagination'
 import { SuperheroCard } from '@/components/superhero-card'
 
 import { fetchHeroes } from '@/store/heroes/operations'
