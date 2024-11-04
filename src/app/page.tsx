@@ -1,10 +1,12 @@
 'use client'
 
 import { Loader } from 'lucide-react'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 import { Pagination } from '@/components/pagination'
 import { SuperheroCard } from '@/components/superhero-card'
+import { Button } from '@/components/ui/button'
 
 import { fetchHeroes } from '@/store/heroes/operations'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
@@ -32,10 +34,6 @@ export default function Home() {
 		dispatch(fetchHeroes({ page, limit: PAGE_LIMIT }))
 	}, [page, dispatch])
 
-	useEffect(() => {
-		localStorage.setItem('page', String(page))
-	}, [page])
-
 	if (status === 'loading') {
 		return (
 			<div className='flex items-center justify-center'>
@@ -48,6 +46,17 @@ export default function Home() {
 		return (
 			<div className='flex items-center justify-center'>
 				<p className='text-red-500 font-semibold'>{error}</p>
+			</div>
+		)
+	}
+
+	if (heroes.length === 0) {
+		return (
+			<div className='flex flex-col items-center justify-center gap-4'>
+				<p>No heroes found. You can create one</p>
+				<Link href='/create-superhero'>
+					<Button>Create Superhero</Button>
+				</Link>
 			</div>
 		)
 	}
@@ -65,11 +74,13 @@ export default function Home() {
 				))}
 			</div>
 
-			<Pagination
-				currentPage={page}
-				totalPages={totalPages}
-				onPageChange={setPage}
-			/>
+			{totalPages > 1 && (
+				<Pagination
+					currentPage={page}
+					totalPages={totalPages}
+					onPageChange={setPage}
+				/>
+			)}
 		</div>
 	)
 }
